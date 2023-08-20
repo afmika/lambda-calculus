@@ -21,10 +21,10 @@ import {
 
 // lambda => js converters
 const asNumber = (n) => n((x) => x + 1)(0);
-const asBoolean = (p) => p(false)(true);
+const asBoolean = (p) => p(true)(false);
 
 // js => lambda converters
-const iter = (n = 0) => (f = ((a) => a)) => (x) => {
+const iter = (n = 0) => (f) => (x) => {
   let ff = f(x);
   while (n > 1) {
     ff = f(ff);
