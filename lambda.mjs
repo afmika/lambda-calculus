@@ -128,10 +128,11 @@ export const exp = (m) => (n) => n(m);
 export const Y = (f) => ((x) => f(x(x)))((x) => f(x(x)));
 
 /**
- * Z combinator, lazy rec version of the `Y combinator`\
+ * Z combinator, eta-expansion of `Y` \
  * `Z = λf. (λxy. (f(x.x))y) (λxy. (f(x.x))y)`
  */
-export const Z = (f) => ((x) => (y) => f(x(x))(y))((x) => (y) => f(x(x))(y));
+export const Z = (f) => ((x) => f((y) => x(x)(y)))((x) => f((y) => x(x)(y)));
+// export const Z = (f) => ((x) => (y) => f(x(x))(y))((x) => (y) => f(x(x))(y));
 // export const Z = (f) => ((x) => x(x))(x => f((y) => x(x)(y)));
 
 /**
@@ -149,8 +150,8 @@ export const IsZero = (n) => n((x) => FALSE)(TRUE);
 // );
 
 // Same as above but each branch are computed in demand per courtesy of the host language
-export const factorial = Z((facto) => (n) => (p) =>
-  p(true)(false)(IsZero(n)) ? _1 : (
+export const factorial = Z((facto) => (n) =>
+  ((p) => p(true)(false))(IsZero(n)) ? _1 : (
     mult(n)(facto(pred(n)))
   )
 );
