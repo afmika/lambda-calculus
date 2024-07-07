@@ -13,7 +13,7 @@ export const I = (a) => a;
 export const M = (f) => f(f);
 
 /**
- * Kestrel combinator: first, export const\
+ * Kestrel combinator: first\
  * `λab.a`
  */
 export const K = (a) => (b) => a;
@@ -93,13 +93,19 @@ export const succ = (n) => (f) => (a) => f(n(f)(a));
  * Predecessor of a Church numeral\
  * `λnfa.n(λgh.h(g f))(λu.a)(λu.u)` (equiv. `λnfa.n(λgh.h(g f))(λu.a)I`)
  */
-export const pred = (n) => (f) => (a) => n(g => h => h(g(f)))(u => a)(I);
+export const pred = (n) => (f) => (a) => n((g) => (h) => h(g(f)))((u) => a)(I);
 
 /**
  * Addition between two Church numerals\
  * `λmnfa.mf(n f a)`
  */
 export const plus = (m) => (n) => (f) => (a) => m(f)(n(f)(a));
+
+/**
+ * Substraction between two Church numerals\
+ * `λmn.(n pred)m`
+ */
+export const minus = (m) => (n) => n(pred)(m);
 
 /**
  * Multiplication between two Church numerals\
@@ -114,3 +120,37 @@ export const mult = (m) => (n) => (f) => (a) => m(n(f))(a);
 export const exp = (m) => (n) => n(m);
 // export const exp = C(C(B)(I)); // pretty neat huh?
 // export const exp = m => n => B(n)(I)(m); // with Bluebird
+
+/**
+ * Y combinator\
+ * `Y = λf. (λx. f(x.x))(λx. f(x.x))`
+ */
+export const Y = (f) => ((x) => f(x(x)))((x) => f(x(x)));
+
+/**
+ * Z combinator, lazy rec version of the `Y combinator`\
+ * `Z = λf. (λxy. (f(x.x))y) (λxy. (f(x.x))y)`
+ */
+export const Z = (f) => ((x) => (y) => f(x(x))(y))((x) => (y) => f(x(x))(y));
+// export const Z = (f) => ((x) => x(x))(x => f((y) => x(x)(y)));
+
+/**
+ * `λn.n (λx. FALSE) TRUE`
+ */
+export const IsZero = (n) => n((x) => FALSE)(TRUE);
+
+// Pure version, this will stack-overflow as the two branches will be computed simulatenously..
+// Lazy-evaluation by default is not native in js
+// FIXME: find a way to lazy eval the paths for this version?
+// export const factorialCanon = Z((facto) => (n) =>
+//   IsZero(n) (_1) (
+//     mult(n)(facto(pred(n)))
+//   )
+// );
+
+// Same as above but each branch are computed in demand per courtesy of the host language
+export const factorial = Z((facto) => (n) => (p) =>
+  p(true)(false)(IsZero(n)) ? _1 : (
+    mult(n)(facto(pred(n)))
+  )
+);
